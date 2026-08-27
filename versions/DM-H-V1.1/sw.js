@@ -1,5 +1,5 @@
-/* offline cache for the encrypted page — build 8o8TJkY */
-const CACHE = 'cardsort-review-8o8TJkY';
+/* offline cache for the encrypted page — build 8zqRYAcU */
+const CACHE = 'cardsort-review-8zqRYAcU';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
 const clean = async res => { const h = new Headers(res.headers); h.delete('Vary'); return new Response(await res.blob(), { status: res.status, headers: h }); };
 self.addEventListener('install', e => e.waitUntil((async () => {
@@ -17,7 +17,9 @@ self.addEventListener('fetch', e => {
   e.respondWith((async () => {
     const key = req.mode === 'navigate' ? './index.html' : url.origin + url.pathname;
     try {
-      const res = await fetch(req);
+      // Always revalidate with the server so a new publish shows up on the next launch
+      // (GitHub Pages sends max-age=600, which would otherwise serve a stale copy).
+      const res = await fetch(req.mode === 'navigate' ? new Request(req, { cache: 'no-cache' }) : req, req.mode === 'navigate' ? undefined : { cache: 'no-cache' });
       if (res.ok) { const c = await caches.open(CACHE); c.put(key, await clean(res.clone())); }
       return res;
     } catch {
